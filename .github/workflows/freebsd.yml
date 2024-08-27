@@ -1,0 +1,42 @@
+name: freebsd
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/freebsd.yml'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/freebsd.yml'
+
+permissions: read-all
+
+jobs:
+  freebsd:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout libva
+      uses: actions/checkout@v4
+      with:
+        repository: intel/libva
+        path: libva
+    - name: checkout libva-utils
+      uses: actions/checkout@v4
+      with:
+        path: libva-utils
+    - name: test
+      uses: vmactions/freebsd-vm@v1
+      with:
+        prepare: |
+          pkg install -y meson pkgconf libdrm libXext libXfixes wayland
+          pkg install -y -x '^mesa($|-libs)'
+        run: |
+          cd libva
+          meson setup _build --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
+          meson compile -C _build
+          meson install -C _build
+          cd ../libva-utils
+          meson setup _build --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
+          meson compile -C _build
+          meson install -C _build
