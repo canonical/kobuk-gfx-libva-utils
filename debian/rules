@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--disable-tests
+
+override_dh_auto_install:
+	dh_auto_install
+	find debian/vainfo/usr/bin -type f -a ! -name vainfo -delete
+
+override_dh_installchangelogs:
+	dh_installchangelogs NEWS
